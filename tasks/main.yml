@@ -1,0 +1,30 @@
+---
+- name: ensure rkhunter is at the latest version
+  apt: pkg=rkhunter state=latest
+  tags:
+    - rkhunter
+    - packages
+
+- name: ensuring daily rkhunter report is schedule with cron
+  cron:
+    name="rkhunter report"
+    minute="0"
+    hour="0"
+    job="rkhunter --update > /dev/null 2>&1; rkhunter --propupd > /dev/null 2>&1; rkhunter --check --skip-keypress --report-warnings-only > /var/log/rkhunter.log  2>&1"
+  tags:
+    - rkhunter
+    - cron
+
+- name: ensure rkhunter logrotation configuration is in place
+  copy:
+    dest=/etc/logrotate.d/rkhunter
+    src=logrotate-rkhunter.conf
+    owner=root
+    group=root
+    mode=644
+  tags:
+    - rkhunter
+    - log
+
+# REFERENCES:
+# Ubuntu step 14 hardening from http://www.thefanclub.co.za/how-to/how-secure-ubuntu-1204-lts-server-part-1-basics
